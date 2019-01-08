@@ -1,37 +1,54 @@
-/*************************************************** 
-  This is a library for the Adafruit VS1053 Codec Breakout
-
-  Designed specifically to work with the Adafruit VS1053 Codec Breakout 
-  ----> https://www.adafruit.com/products/1381
-
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
-  BSD license, all text above must be included in any redistribution
- ****************************************************/
+// ********************************************************************** /
+// This is a library for the Adafruit VS1053 Codec Breakout
+//
+// Designed specifically to work with the Adafruit VS1053 Codec Breakout 
+// ----> https://www.adafruit.com/products/1381
+// 
+// Adafruit invests time and resources providing this open source code, 
+// please support Adafruit and open-source hardware by purchasing 
+// products from Adafruit!
+//// Written by Limor Fried/Ladyada for Adafruit Industries.  
+// BSD license, all text above must be included in any redistribution
+// 
+// Original library: https://github.com/adafruit/Adafruit_VS1053_Library
+// 
+// Ported for Particle by ScruffR
+// Forked and ported: https://github.com/ScruffR/Adafruit_VS1053_Library
+// ********************************************************************** /
 #ifndef ADAFRUIT_VS1053_H
 #define ADAFRUIT_VS1053_H
 
-#if (ARDUINO >= 100)
- #include <Arduino.h>
+#if defined(PARTICLE)
+# include <Particle.h>
+# if (SYSTEM_VERSION >= 0x00060100)
+#   if !defined(SPI_HAS_TRANSACTION)
+#     define SPI_HAS_TRANSACTION 1
+#   endif
+# else
+#   warn "Requires Particle Device OS 0.6.1+ to support SPI transactions"
+# endif
+# include <SdFat.h>
+  extern SdFat SD;
 #else
- #include <WProgram.h>
- #include <pins_arduino.h>
-#endif
+# if (ARDUINO >= 100)
+#   include <Arduino.h>
+# else
+#   include <WProgram.h>
+#   include <pins_arduino.h>
+# endif
 
-#if !defined(ARDUINO_STM32_FEATHER)
-#include "pins_arduino.h"
-#include "wiring_private.h"
-#endif
+# if !defined(ARDUINO_STM32_FEATHER)
+#   include "pins_arduino.h"
+#   include "wiring_private.h"
+# endif
 
-#include <SPI.h> 
-#if defined(PREFER_SDFAT_LIBRARY)
- #include <SdFat.h>
- extern SdFat SD;
-#else
- #include <SD.h>
+# include <SPI.h> 
+# if defined(PREFER_SDFAT_LIBRARY)
+#   include <SdFat.h>
+    extern SdFat SD;
+# else
+#   include <SD.h>
+# endif
 #endif
 
 // define here the size of a register!
@@ -107,11 +124,10 @@ typedef volatile RwReg PortReg;
 
 #define VS1053_DATABUFFERLEN 32
 
-
 class Adafruit_VS1053 {
  public:
   Adafruit_VS1053(int8_t mosi, int8_t miso, int8_t clk, 
-		  int8_t rst, int8_t cs, int8_t dcs, int8_t dreq);
+	  int8_t rst, int8_t cs, int8_t dcs, int8_t dreq);
   Adafruit_VS1053(int8_t rst, int8_t cs, int8_t dcs, int8_t dreq);
   uint8_t begin(void);
   void reset(void);
@@ -146,21 +162,21 @@ class Adafruit_VS1053 {
 
   uint8_t mp3buffer[VS1053_DATABUFFERLEN];
 
+private:
+  boolean useHardwareSPI;
+
 #ifdef ARDUINO_ARCH_SAMD
 protected:
   uint32_t  _dreq;
 private:
   int32_t _mosi, _miso, _clk, _reset, _cs, _dcs;
-  boolean useHardwareSPI;
 #else
  protected:
   uint8_t  _dreq;
  private:
   int8_t _mosi, _miso, _clk, _reset, _cs, _dcs;
-  boolean useHardwareSPI;
 #endif
 };
-
 
 class Adafruit_VS1053_FilePlayer : public Adafruit_VS1053 {
  public:
@@ -183,6 +199,9 @@ class Adafruit_VS1053_FilePlayer : public Adafruit_VS1053 {
   boolean paused(void);
   boolean stopped(void);
   void pausePlaying(boolean pause);
+  void setIsrCallback(void (*cb)(void));
+
+  static void (*isrCallback)(void);
 
  private:
   void feedBuffer_noLock(void);
