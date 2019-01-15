@@ -3,6 +3,8 @@
 //
 // Designed specifically to work with the Adafruit VS1053 Codec Breakout 
 // ----> https://www.adafruit.com/products/1381
+//       https://www.adafruit.com/product/3357
+//       https://www.adafruit.com/product/3436
 // 
 // Adafruit invests time and resources providing this open source code, 
 // please support Adafruit and open-source hardware by purchasing 
@@ -15,6 +17,7 @@
 // Ported for Particle by ScruffR
 // Forked and ported: https://github.com/ScruffR/Adafruit_VS1053_Library
 // ********************************************************************** /
+
 #ifndef ADAFRUIT_VS1053_H
 #define ADAFRUIT_VS1053_H
 
